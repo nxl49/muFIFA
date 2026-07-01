@@ -1,0 +1,17 @@
+match_id,stage,home_team,away_team,predicted_home_score,predicted_away_score,predicted_scorers_home,predicted_scorers_away,predicted_winner
+R16_001,Round of 16,Canada,Morocco,0,1,,20,Morocco
+R16_002,Round of 16,France,Paraguay,1,0,10,,France
+R16_003,Round of 16,Norway,Brazil,0,1,,7,Brazil
+R16_004,Round of 16,Mexico,England,0,1,,9,England
+R16_005,Round of 16,Belgium,United States,0,1,,10,United States
+R16_006,Round of 16,Switzerland,Spain,0,1,,21,Spain
+R16_007,Round of 16,Portugal,Argentina,0,1,,10,Argentina
+R16_008,Round of 16,Colombia,Australia,1,0,7,,Colombia
+QF_001,Quarter Final,Morocco,France,0,1,,10,France
+QF_002,Quarter Final,England,Brazil,0,1,,7,Brazil
+QF_003,Quarter Final,United States,Spain,0,1,,21,Spain
+QF_004,Quarter Final,Argentina,Colombia,1,0,10,,Argentina
+SF_001,Semi Final,France,Brazil,1,0,10,,France
+SF_002,Semi Final,Spain,Argentina,0,1,,10,Argentina
+TP_001,Third Place Play-off,Brazil,Spain,0,1,,21,Spain
+F_001,Final,France,Argentina,0,1,,10,Argentina
