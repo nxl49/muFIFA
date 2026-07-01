@@ -21,13 +21,46 @@ import bracket as B
 
 
 class Predictor:
-    def __init__(self, results_csv="data/results.csv"):
+    def __init__(self, results_csv="data/results.csv", shootouts_csv="data/shootouts.csv"):
         r = pd.read_csv(results_csv)
         self.ratings, annotated = compute_elo(r)
         asof = annotated["date"].max()
         self.beta = fit_poisson(build_training(annotated, asof))
         self.rho = fit_rho(annotated, self.beta, asof)
         self.asof = asof
+        # keep raw results/shootouts so R32 winners can be auto-read once played
+        self.results = r.copy()
+        self.results["date"] = pd.to_datetime(self.results["date"])
+        try:
+            self.shootouts = pd.read_csv(shootouts_csv)
+            self.shootouts["date"] = pd.to_datetime(self.shootouts["date"])
+        except (FileNotFoundError, OSError):
+            self.shootouts = None
+
+    def actual_r32_winner(self, home, away):
+        """Return the real winner of a Round-of-32 fixture if the dataset has the
+        result (incl. penalty shootouts); else None. Lets predictions auto-update
+        after `bash data/download.sh` refreshes the dataset."""
+        df = self.results
+        m = df[(df["tournament"] == "FIFA World Cup")
+               & (df["date"] >= "2026-06-28") & (df["date"] < "2026-07-04")
+               & (((df["home_team"] == home) & (df["away_team"] == away))
+                  | ((df["home_team"] == away) & (df["away_team"] == home)))]
+        if len(m) == 0 or pd.isna(m.iloc[0]["home_score"]):
+            return None
+        row = m.iloc[0]
+        hs, as_ = int(row["home_score"]), int(row["away_score"])
+        if hs > as_:
+            return row["home_team"]
+        if as_ > hs:
+            return row["away_team"]
+        if self.shootouts is not None:                       # regulation draw -> shootout
+            sh = self.shootouts[(self.shootouts["date"] == row["date"])
+                                & (self.shootouts[["home_team", "away_team"]]
+                                   .isin([home, away]).all(axis=1))]
+            if len(sh):
+                return sh.iloc[0]["winner"]
+        return None
 
     def lambdas(self, home, away, rnd):
         rd = (self.ratings[home] - self.ratings[away]) / 100.0
@@ -79,9 +112,12 @@ class Predictor:
 
     def r32_winner(self, mid, rnd="R32"):
         h, a, locked = B.R32[mid]
-        if locked:
+        if locked:                                   # hand-locked in bracket.py
             return locked
-        return self.predict_match(h, a, rnd)["winner"]
+        actual = self.actual_r32_winner(h, a)        # real result once dataset has it
+        if actual:
+            return actual
+        return self.predict_match(h, a, rnd)["winner"]   # else model prediction
 
     def deterministic_bracket(self):
         """Resolve R32(pending)->R16->QF->SF->Final. Returns ordered fixtures."""

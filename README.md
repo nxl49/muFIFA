@@ -72,21 +72,27 @@ bash data/download.sh          # fetch the datasets (a pinned snapshot is commit
 .venv/bin/python src/report.py            # -> output/model_report.md
 ```
 
-## ⏭️ Post-Round-of-32 workflow
+## ⏭️ Updating once the Round of 16 is confirmed
 
 Nine R32 matches (July 1-3) are still to be played, so **five of the eight R16
-slots currently use the model's R32 picks**. Once the real Round of 32 finishes
-(before R16 kicks off, July 4), lock the actual winners and re-run for an
-actual-teams prediction:
+slots currently use the model's R32 picks**. Updating is **automatic** — the R32
+winners are read straight from the dataset (including penalty shootouts) as soon
+as the games are recorded. Just refresh the data and re-run:
 
-1. In [`src/bracket.py`](src/bracket.py) (and the notebook's `R32` dict), set the
-   third field of each R32 match to the real winner, e.g.
-   `8: ("England", "DR Congo", "England")`.
-2. Re-run `src/build_predictions.py` (or the notebook). R16 → Final regenerate
-   automatically from the now-actual R16 field.
+```bash
+bash data/download.sh                       # pulls the now-complete R32 results
+.venv/bin/python src/build_predictions.py   # -> output/predictions.csv (actual R16 field)
+# or simply re-run notebooks/mufifa_worldcup_2026.ipynb
+```
+
+No code edits needed: `Predictor.actual_r32_winner()` fills each pending slot from
+reality, and the R16 → Final bracket regenerates from the now-actual R16 teams.
+(To override a specific result manually, set the third field of an `R32` entry in
+[`src/bracket.py`](src/bracket.py), e.g. `8: ("England", "DR Congo", "England")`.)
 
 Three R16 fixtures are **already fixed by real results**: Canada–Morocco,
-France–Paraguay, Norway–Brazil.
+France–Paraguay, Norway–Brazil. After refreshing, sanity-check the printed R16
+pairings against the official bracket before submitting.
 
 ## Data
 - **Results / goalscorers / shootouts** — [martj42/international_results](https://github.com/martj42/international_results)
