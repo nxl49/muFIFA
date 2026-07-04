@@ -12,9 +12,18 @@ and the advancing team.
 | # | Deliverable | Path |
 |---|-------------|------|
 | 1 | **ML notebook** (runs top-to-bottom, generates everything) | [`notebooks/mufifa_worldcup_2026.ipynb`](notebooks/mufifa_worldcup_2026.ipynb) |
-| 2 | **Filled submission CSV** (official template format) | [`output/predictions.csv`](output/predictions.csv) |
+| 2 | **Filled submission CSV** — matches the platform's **currently active** template (Quarterfinal→Final; the Round-of-16 submission window has closed) | [`output/predictions.csv`](output/predictions.csv) |
+| – | Full R16→Final reference (all 16 fixtures, for the record) | [`output/predictions_full_r16_final.csv`](output/predictions_full_r16_final.csv) |
 | – | Model report (ratings, params, title odds) | [`output/model_report.md`](output/model_report.md) |
 | – | Modular source (mirror of the notebook) | [`src/`](src/) |
+
+> **Note on templates:** the submission platform's template shape changes as
+> the tournament progresses. [`templates/mufifa26_template_qf_final.csv`](templates/mufifa26_template_qf_final.csv)
+> is the currently-active one (`QF_001`…`F_001`, `"TBD"` placeholders); the
+> earlier [`templates/mufifa26_template_r16_final.csv`](templates/mufifa26_template_r16_final.csv)
+> (`R16_001`…`F_001`) is kept for reference. `src/build_predictions.py` takes
+> the template path as an argument, so pointing it at whichever template the
+> platform currently accepts regenerates the correctly-shaped CSV.
 
 ---
 
@@ -119,7 +128,8 @@ src/simulate.py                         deterministic + Monte-Carlo simulator
 src/squads.py                           2026 shirt numbers
 src/build_predictions.py                fills the template -> output/predictions.csv
 src/report.py                           model_report.md generator
-templates/mufifa26_template.csv         the official empty template
+templates/mufifa26_template_qf_final.csv  active template (QF -> Final)
+templates/mufifa26_template_r16_final.csv earlier template (R16 -> Final, reference)
 output/predictions.csv                  filled submission (deliverable 2)
 data/                                    dataset snapshot + download.sh
 ```

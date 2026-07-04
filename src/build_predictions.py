@@ -1,5 +1,5 @@
 """
-End-to-end: build the filled prediction template (Round of 16 -> Final).
+End-to-end: build the filled prediction template.
 
 Pipeline:
   ratings (Elo) -> goal model (Poisson + Dixon-Coles) -> deterministic bracket
@@ -8,14 +8,28 @@ Pipeline:
 Scorer assignment is data-driven: each team's goalscorers over the last few
 years (recency-weighted, own goals removed) are ranked, and the top-ranked
 players with a known 2026 shirt number are chosen, one per predicted goal.
+
+The submission platform's active template can change shape as the tournament
+progresses (e.g. it dropped the Round-of-16 rows once that stage's submission
+window closed, leaving only Quarterfinal onward, with "TBD" team placeholders
+for us to fill in). Point TEMPLATE at whichever template file the platform
+currently accepts; the script only fills rows whose match_id is present in it
+-- every fixture is always predicted internally via the full R16->Final
+simulation, only the OUTPUT is filtered to what the template asks for.
+
+Usage: python build_predictions.py [template_path] [output_path]
 """
+import sys
 import pandas as pd
 import numpy as np
 from simulate import Predictor
 from squads import SQUAD_NUMBERS, canonical
 import bracket as B
 
-TEMPLATE = "templates/mufifa26_template.csv"
+# Currently-active submission template (platform closed R16 predictions;
+# QF_001..F_001 is the live match_id set as of 2026-07-04).
+TEMPLATE = "templates/mufifa26_template_qf_final.csv"
+OUTPUT = "output/predictions.csv"
 
 
 def scorer_ranking(goalscorers_csv="data/goalscorers.csv", since="2021-01-01",
@@ -52,10 +66,10 @@ def pick_scorers(team, n_goals, ranking):
     return chosen[:n_goals]
 
 
-def main():
+def main(template_path=TEMPLATE, out_path=OUTPUT):
     P = Predictor()
     ranking = scorer_ranking()
-    fixtures = P.deterministic_bracket()
+    fixtures = P.deterministic_bracket()          # always the full R16 -> Final simulation
 
     # index predictions by the official match_id
     by_id = {}
@@ -72,15 +86,20 @@ def main():
             "predicted_winner": fx["winner"],
         }
 
-    # fill the official template row-by-row, preserving its match_id order
-    tmpl = pd.read_csv(TEMPLATE, dtype=str, keep_default_na=False)
+    # fill whichever template is currently active, row-by-row, preserving its
+    # own match_id set and order -- rows for stages the template doesn't ask
+    # for (e.g. a closed Round of 16) are simply not in it.
+    tmpl = pd.read_csv(template_path, dtype=str, keep_default_na=False)
+    unknown = [mid for mid in tmpl["match_id"] if mid not in by_id]
+    if unknown:
+        print(f"WARNING: template has match_id(s) with no prediction: {unknown}")
     for i, row in tmpl.iterrows():
         pred = by_id.get(row["match_id"])
         if pred:
             for k, v in pred.items():
                 tmpl.at[i, k] = v
     df = tmpl
-    out = "output/predictions.csv"
+    out = out_path
     df.to_csv(out, index=False)
 
     # validate the "scorers <= score" rule and that every row is filled
@@ -101,4 +120,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = sys.argv[1:]
+    main(*args)
