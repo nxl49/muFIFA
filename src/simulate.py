@@ -21,46 +21,13 @@ import bracket as B
 
 
 class Predictor:
-    def __init__(self, results_csv="data/results.csv", shootouts_csv="data/shootouts.csv"):
+    def __init__(self, results_csv="data/results.csv"):
         r = pd.read_csv(results_csv)
         self.ratings, annotated = compute_elo(r)
         asof = annotated["date"].max()
         self.beta = fit_poisson(build_training(annotated, asof))
         self.rho = fit_rho(annotated, self.beta, asof)
         self.asof = asof
-        # keep raw results/shootouts so R32 winners can be auto-read once played
-        self.results = r.copy()
-        self.results["date"] = pd.to_datetime(self.results["date"])
-        try:
-            self.shootouts = pd.read_csv(shootouts_csv)
-            self.shootouts["date"] = pd.to_datetime(self.shootouts["date"])
-        except (FileNotFoundError, OSError):
-            self.shootouts = None
-
-    def actual_r32_winner(self, home, away):
-        """Return the real winner of a Round-of-32 fixture if the dataset has the
-        result (incl. penalty shootouts); else None. Lets predictions auto-update
-        after `bash data/download.sh` refreshes the dataset."""
-        df = self.results
-        m = df[(df["tournament"] == "FIFA World Cup")
-               & (df["date"] >= "2026-06-28") & (df["date"] < "2026-07-04")
-               & (((df["home_team"] == home) & (df["away_team"] == away))
-                  | ((df["home_team"] == away) & (df["away_team"] == home)))]
-        if len(m) == 0 or pd.isna(m.iloc[0]["home_score"]):
-            return None
-        row = m.iloc[0]
-        hs, as_ = int(row["home_score"]), int(row["away_score"])
-        if hs > as_:
-            return row["home_team"]
-        if as_ > hs:
-            return row["away_team"]
-        if self.shootouts is not None:                       # regulation draw -> shootout
-            sh = self.shootouts[(self.shootouts["date"] == row["date"])
-                                & (self.shootouts[["home_team", "away_team"]]
-                                   .isin([home, away]).all(axis=1))]
-            if len(sh):
-                return sh.iloc[0]["winner"]
-        return None
 
     def lambdas(self, home, away, rnd):
         rd = (self.ratings[home] - self.ratings[away]) / 100.0
@@ -110,51 +77,38 @@ class Predictor:
             "lh": lh, "la": la,
         }
 
-    def r32_winner(self, mid, rnd="R32"):
-        h, a, locked = B.R32[mid]
-        if locked:                                   # hand-locked in bracket.py
-            return locked
-        actual = self.actual_r32_winner(h, a)        # real result once dataset has it
-        if actual:
-            return actual
-        return self.predict_match(h, a, rnd)["winner"]   # else model prediction
-
     def deterministic_bracket(self):
-        """Resolve R32(pending)->R16->QF->SF->Final. Returns ordered fixtures."""
+        """Resolve the actual R16 fixtures -> QF -> SF -> 3rd/Final. Ordered list."""
         fixtures = []
 
-        # R16 teams from R32 winners
-        r16_teams = {k: (self.r32_winner(f_home), self.r32_winner(f_away))
-                     for k, (f_home, f_away) in B.R16.items()}
+        # Round of 16 — actual fixtures
+        r16_win = []
+        for i, (h, a) in enumerate(B.R16_FIXTURES):
+            p = self.predict_match(h, a, "R16"); p["slot"] = f"R16-{i}"
+            fixtures.append(p); r16_win.append(p["winner"])
 
-        r16_win = {}
-        for k in "ABCDEFGH":
-            h, a = r16_teams[k]
-            p = self.predict_match(h, a, "R16"); p["slot"] = f"R16-{k}"
-            fixtures.append(p); r16_win[k] = p["winner"]
+        # Quarterfinals
+        qf_win = []
+        for q, (i, j) in enumerate(B.QF_PAIRS):
+            p = self.predict_match(r16_win[i], r16_win[j], "QF"); p["slot"] = f"QF-{q}"
+            fixtures.append(p); qf_win.append(p["winner"])
 
-        qf_win = {}
-        for q, (fh, fa) in B.QF.items():
-            h, a = r16_win[fh], r16_win[fa]
-            p = self.predict_match(h, a, "QF"); p["slot"] = f"QF{q}"
-            fixtures.append(p); qf_win[q] = p["winner"]
-
-        sf_win, sf_lose = {}, {}
-        for sfi, (fh, fa) in B.SF.items():
-            h, a = qf_win[fh], qf_win[fa]
-            p = self.predict_match(h, a, "SF"); p["slot"] = f"SF{sfi}"
+        # Semifinals
+        sf_win, sf_lose = [], []
+        for si, (i, j) in enumerate(B.SF_PAIRS):
+            p = self.predict_match(qf_win[i], qf_win[j], "SF"); p["slot"] = f"SF-{si}"
             fixtures.append(p)
-            sf_win[sfi] = p["winner"]
-            sf_lose[sfi] = a if p["winner"] == h else h
+            sf_win.append(p["winner"])
+            sf_lose.append(p["away"] if p["winner"] == p["home"] else p["home"])
 
         # Third-place play-off: the two beaten semifinalists.
-        h, a = sf_lose[B.THIRD_PLACE[0]], sf_lose[B.THIRD_PLACE[1]]
-        p = self.predict_match(h, a, "Third"); p["slot"] = "Third"
+        i, j = B.THIRD_PAIR
+        p = self.predict_match(sf_lose[i], sf_lose[j], "Third"); p["slot"] = "Third"
         fixtures.append(p)
 
         # Final
-        h, a = sf_win[B.FINAL[0]], sf_win[B.FINAL[1]]
-        p = self.predict_match(h, a, "Final"); p["slot"] = "Final"
+        i, j = B.FINAL_PAIR
+        p = self.predict_match(sf_win[i], sf_win[j], "Final"); p["slot"] = "Final"
         fixtures.append(p)
         return fixtures
 
@@ -176,22 +130,15 @@ class Predictor:
         rng = np.random.default_rng(seed)
         champ = {}; finalist = {}; last4 = {}
         for _ in range(n):
-            r32w = {mid: (lk if (lk := B.R32[mid][2]) else
-                          self._sample_result(*B.R32[mid][:2], "R32", rng))
-                    for mid in B.R32}
-            r16w = {}
-            for k, (fh, fa) in B.R16.items():
-                r16w[k] = self._sample_result(r32w[fh], r32w[fa], "R16", rng)
-            qfw = {}
-            for q, (fh, fa) in B.QF.items():
-                qfw[q] = self._sample_result(r16w[fh], r16w[fa], "QF", rng)
-            sfw = {}
-            for sfi, (fh, fa) in B.SF.items():
-                t = self._sample_result(qfw[fh], qfw[fa], "SF", rng)
-                sfw[sfi] = t
-                last4[qfw[fh]] = last4.get(qfw[fh], 0) + 1
-                last4[qfw[fa]] = last4.get(qfw[fa], 0) + 1
-            fh, fa = sfw[B.FINAL[0]], sfw[B.FINAL[1]]
+            r16w = [self._sample_result(h, a, "R16", rng) for h, a in B.R16_FIXTURES]
+            qfw = [self._sample_result(r16w[i], r16w[j], "QF", rng) for i, j in B.QF_PAIRS]
+            sfw = []
+            for i, j in B.SF_PAIRS:
+                t = self._sample_result(qfw[i], qfw[j], "SF", rng)
+                sfw.append(t)
+                last4[qfw[i]] = last4.get(qfw[i], 0) + 1
+                last4[qfw[j]] = last4.get(qfw[j], 0) + 1
+            fh, fa = sfw[B.FINAL_PAIR[0]], sfw[B.FINAL_PAIR[1]]
             finalist[fh] = finalist.get(fh, 0) + 1
             finalist[fa] = finalist.get(fa, 0) + 1
             c = self._sample_result(fh, fa, "Final", rng)
@@ -204,14 +151,7 @@ if __name__ == "__main__":
     P = Predictor()
     print(f"Model asof {P.asof.date()} | beta={np.round(P.beta,3)} rho={P.rho:.3f}\n")
 
-    print("=== Pending R32 predictions (to set the R16 field) ===")
-    for mid in range(8, 17):
-        h, a, _ = B.R32[mid]
-        pr = P.predict_match(h, a, "R32")
-        print(f"  {h} vs {a}: {pr['home_score']}-{pr['away_score']} -> {pr['winner']} "
-              f"(adv {pr['p_home_adv']:.0%} home)")
-
-    print("\n=== Deterministic most-likely bracket ===")
+    print("=== Deterministic most-likely bracket (R16 -> Final) ===")
     for fx in P.deterministic_bracket():
         print(f"  [{fx['slot']:>6}] {fx['home']:>22} {fx['home_score']}-{fx['away_score']} "
               f"{fx['away']:<22} => {fx['winner']}")

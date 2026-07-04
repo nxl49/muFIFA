@@ -53,8 +53,8 @@ from 2023-2026 the model never saw** (Elo uses only pre-match info → no leakag
 
 | Metric | Model | Base-rate baseline |
 |--------|-------|--------------------|
-| 3-way accuracy | **60.7 %** | — |
-| Log-loss | **0.866** | 1.054 (**−17.8 %**) |
+| 3-way accuracy | **60.8 %** | — |
+| Log-loss | **0.865** | 1.054 (**−17.9 %**) |
 
 ## Run it
 
@@ -72,27 +72,26 @@ bash data/download.sh          # fetch the datasets (a pinned snapshot is commit
 .venv/bin/python src/report.py            # -> output/model_report.md
 ```
 
-## ⏭️ Updating once the Round of 16 is confirmed
+## Round of 16 field (actual — Round of 32 complete)
 
-Nine R32 matches (July 1-3) are still to be played, so **five of the eight R16
-slots currently use the model's R32 picks**. Updating is **automatic** — the R32
-winners are read straight from the dataset (including penalty shootouts) as soon
-as the games are recorded. Just refresh the data and re-run:
+The Round of 32 is done, so predictions run from the **actual** R16 fixtures,
+hard-coded in [`src/bracket.py`](src/bracket.py) and verified against the official
+bracket:
+
+| QF | Round-of-16 fixtures feeding it |
+|----|---------------------------------|
+| QF1 | Canada–Morocco · Paraguay–France |
+| QF2 | Brazil–Norway · Mexico–England |
+| QF3 | Portugal–Spain · USA–Belgium |
+| QF4 | Argentina–Egypt · Switzerland–Colombia |
+
+To regenerate after a later round is played, refresh the data and re-run — ratings
+update automatically from the new results:
 
 ```bash
-bash data/download.sh                       # pulls the now-complete R32 results
-.venv/bin/python src/build_predictions.py   # -> output/predictions.csv (actual R16 field)
-# or simply re-run notebooks/mufifa_worldcup_2026.ipynb
+bash data/download.sh
+.venv/bin/python src/build_predictions.py   # -> output/predictions.csv
 ```
-
-No code edits needed: `Predictor.actual_r32_winner()` fills each pending slot from
-reality, and the R16 → Final bracket regenerates from the now-actual R16 teams.
-(To override a specific result manually, set the third field of an `R32` entry in
-[`src/bracket.py`](src/bracket.py), e.g. `8: ("England", "DR Congo", "England")`.)
-
-Three R16 fixtures are **already fixed by real results**: Canada–Morocco,
-France–Paraguay, Norway–Brazil. After refreshing, sanity-check the printed R16
-pairings against the official bracket before submitting.
 
 ## Data
 - **Results / goalscorers / shootouts** — [martj42/international_results](https://github.com/martj42/international_results)

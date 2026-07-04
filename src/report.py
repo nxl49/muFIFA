@@ -13,7 +13,7 @@ def main():
 
     w("# 2026 World Cup Knockout Model - Report\n")
     w(f"_Model as-of date: {P.asof.date()} (ratings include all matches through "
-      f"the 2026 group stage + 7 completed Round-of-32 games)._\n")
+      f"the completed 2026 Round of 32). Predictions run from the actual Round of 16._\n")
 
     w("## Fitted model parameters\n")
     w("```")
@@ -32,22 +32,11 @@ def main():
         w(f"| {i} | {t} | {v:.0f} |")
     w("")
 
-    w("## Locked Round-of-32 results (actual, through June 30 2026)\n")
-    locked = [(m, *B.R32[m][:2], B.R32[m][2]) for m in B.R32 if B.R32[m][2]]
-    w("| Match | Winner |")
-    w("|-------|--------|")
-    for _, h, a, win in locked:
-        w(f"| {h} vs {a} | **{win}** |")
-    w("")
-
-    w("## Predicted pending Round-of-32 (sets the R16 field)\n")
-    w("| Fixture | Score | Winner | Win prob |")
-    w("|---------|-------|--------|----------|")
-    for mid in range(8, 17):
-        h, a, _ = B.R32[mid]
-        pr = P.predict_match(h, a, "R32")
-        w(f"| {h} vs {a} | {pr['home_score']}-{pr['away_score']} | "
-          f"{pr['winner']} | {pr['p_home_adv']:.0%} home |")
+    w("## Actual Round of 16 fixtures (from completed Round of 32)\n")
+    w("| # | Fixture |")
+    w("|---|---------|")
+    for i, (h, a) in enumerate(B.R16_FIXTURES, 1):
+        w(f"| {i} | {h} vs {a} |")
     w("")
 
     w("## Predicted bracket (Round of 16 -> Final)\n")

@@ -18,6 +18,7 @@ SQUAD_NUMBERS = {
     "Morocco":       {"Ayoub El Kaabi": 20, "Brahim Díaz": 10, "Achraf Hakimi": 2},
     "United States": {"Christian Pulisic": 10, "Weston McKennie": 8},
     "Colombia":      {"Luis Díaz": 7, "James Rodríguez": 10, "Jhon Córdoba": 9},
+    "Mexico":        {"Raúl Jiménez": 9, "Santiago Giménez": 11},
 }
 
 # Accent / spelling variants that appear in goalscorers.csv -> canonical name.

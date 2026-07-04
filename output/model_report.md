@@ -1,12 +1,12 @@
 # 2026 World Cup Knockout Model - Report
 
-_Model as-of date: 2026-06-29 (ratings include all matches through the 2026 group stage + 7 completed Round-of-32 games)._
+_Model as-of date: 2026-07-03 (ratings include all matches through the completed 2026 Round of 32). Predictions run from the actual Round of 16._
 
 ## Fitted model parameters
 
 ```
-Poisson goals:  log(lambda) = 0.0997 + 0.1841*(EloDiff/100) + 0.2442*is_home
-Dixon-Coles rho = -0.0471
+Poisson goals:  log(lambda) = 0.0999 + 0.1841*(EloDiff/100) + 0.2440*is_home
+Dixon-Coles rho = -0.0472
 Backtest (train 2002-2022, test 2023-2026, 3674 matches):
    W/D/L accuracy 60.7%   log-loss 0.866 vs 1.054 base-rate (-17.8%)
 ```
@@ -15,89 +15,76 @@ Backtest (train 2002-2022, test 2023-2026, 3674 matches):
 
 | # | Team | Elo |
 |---|------|-----|
-| 1 | Argentina | 2220 |
-| 2 | Spain | 2205 |
-| 3 | France | 2186 |
-| 4 | Brazil | 2112 |
-| 5 | England | 2108 |
-| 6 | Colombia | 2083 |
-| 7 | Portugal | 2054 |
-| 8 | Netherlands | 2049 |
-| 9 | Morocco | 2034 |
-| 10 | Mexico | 2024 |
-| 11 | Germany | 1996 |
-| 12 | Ecuador | 1988 |
-| 13 | Norway | 1985 |
-| 14 | Switzerland | 1978 |
+| 1 | Argentina | 2222 |
+| 2 | Spain | 2221 |
+| 3 | France | 2197 |
+| 4 | England | 2118 |
+| 5 | Brazil | 2112 |
+| 6 | Colombia | 2088 |
+| 7 | Portugal | 2076 |
+| 8 | Mexico | 2056 |
+| 9 | Netherlands | 2049 |
+| 10 | Morocco | 2034 |
+| 11 | Switzerland | 2012 |
+| 12 | Norway | 2005 |
+| 13 | Germany | 1996 |
+| 14 | Belgium | 1988 |
 | 15 | Japan | 1976 |
-| 16 | Croatia | 1965 |
-| 17 | Belgium | 1963 |
+| 16 | Ecuador | 1956 |
+| 17 | Croatia | 1943 |
 | 18 | Italy | 1928 |
 | 19 | Turkey | 1925 |
 | 20 | Denmark | 1924 |
 
-## Locked Round-of-32 results (actual, through June 30 2026)
+## Actual Round of 16 fixtures (from completed Round of 32)
 
-| Match | Winner |
-|-------|--------|
-| South Africa vs Canada | **Canada** |
-| Netherlands vs Morocco | **Morocco** |
-| France vs Sweden | **France** |
-| Germany vs Paraguay | **Paraguay** |
-| Ivory Coast vs Norway | **Norway** |
-| Brazil vs Japan | **Brazil** |
-| Mexico vs Ecuador | **Mexico** |
-
-## Predicted pending Round-of-32 (sets the R16 field)
-
-| Fixture | Score | Winner | Win prob |
-|---------|-------|--------|----------|
-| England vs DR Congo | 1-0 | England | 85% home |
-| Belgium vs Senegal | 1-0 | Belgium | 59% home |
-| United States vs Bosnia and Herzegovina | 2-0 | United States | 86% home |
-| Switzerland vs Algeria | 1-0 | Switzerland | 62% home |
-| Spain vs Austria | 1-0 | Spain | 85% home |
-| Portugal vs Croatia | 1-0 | Portugal | 63% home |
-| Argentina vs Cape Verde | 2-0 | Argentina | 97% home |
-| Colombia vs Ghana | 2-0 | Colombia | 92% home |
-| Australia vs Egypt | 1-0 | Australia | 58% home |
+| # | Fixture |
+|---|---------|
+| 1 | Canada vs Morocco |
+| 2 | Paraguay vs France |
+| 3 | Brazil vs Norway |
+| 4 | Mexico vs England |
+| 5 | Portugal vs Spain |
+| 6 | United States vs Belgium |
+| 7 | Argentina vs Egypt |
+| 8 | Switzerland vs Colombia |
 
 ## Predicted bracket (Round of 16 -> Final)
 
 | Stage | Home | Score | Away | Winner | P(home adv) |
 |-------|------|-------|------|--------|-------------|
-| R16-A | Canada | 0-1 | Morocco | **Morocco** | 29% |
-| R16-B | France | 1-0 | Paraguay | **France** | 84% |
-| R16-C | Norway | 0-1 | Brazil | **Brazil** | 32% |
-| R16-D | Mexico | 0-1 | England | **England** | 47% |
-| R16-E | Belgium | 0-1 | United States | **United States** | 48% |
-| R16-F | Switzerland | 0-1 | Spain | **Spain** | 21% |
-| R16-G | Portugal | 0-1 | Argentina | **Argentina** | 27% |
-| R16-H | Colombia | 1-0 | Australia | **Colombia** | 73% |
-| QF1 | Morocco | 0-1 | France | **France** | 29% |
-| QF2 | England | 0-1 | Brazil | **Brazil** | 50% |
-| QF3 | United States | 0-1 | Spain | **Spain** | 20% |
-| QF4 | Argentina | 1-0 | Colombia | **Argentina** | 69% |
-| SF1 | France | 1-0 | Brazil | **France** | 61% |
-| SF2 | Spain | 0-1 | Argentina | **Argentina** | 48% |
-| Third | Brazil | 0-1 | Spain | **Spain** | 37% |
-| Final | France | 0-1 | Argentina | **Argentina** | 45% |
+| R16-0 | Canada | 0-1 | Morocco | **Morocco** | 29% |
+| R16-1 | Paraguay | 0-1 | France | **France** | 15% |
+| R16-2 | Brazil | 1-0 | Norway | **Brazil** | 65% |
+| R16-3 | Mexico | 1-0 | England | **Mexico** | 51% |
+| R16-4 | Portugal | 0-1 | Spain | **Spain** | 30% |
+| R16-5 | United States | 1-0 | Belgium | **United States** | 50% |
+| R16-6 | Argentina | 2-0 | Egypt | **Argentina** | 90% |
+| R16-7 | Switzerland | 0-1 | Colombia | **Colombia** | 39% |
+| QF-0 | Morocco | 0-1 | France | **France** | 28% |
+| QF-1 | Brazil | 1-0 | Mexico | **Brazil** | 58% |
+| QF-2 | Spain | 1-0 | United States | **Spain** | 81% |
+| QF-3 | Argentina | 1-0 | Colombia | **Argentina** | 69% |
+| SF-0 | France | 1-0 | Brazil | **France** | 62% |
+| SF-1 | Spain | 0-1 | Argentina | **Argentina** | 50% |
+| Third | Brazil | 0-1 | Spain | **Spain** | 35% |
+| Final | France | 0-1 | Argentina | **Argentina** | 46% |
 
 ## Monte-Carlo tournament simulation (50,000 runs)
 
 | Team | Champion | Reaches Final | Reaches SF |
 |------|----------|---------------|------------|
-| Argentina | 21.5% | 33.8% | 51.7% |
-| France | 21.4% | 38.2% | 59.4% |
-| Spain | 18.8% | 30.6% | 52.6% |
-| Brazil | 8.9% | 19.1% | 37.5% |
-| Colombia | 6.1% | 13.4% | 26.7% |
-| England | 5.4% | 12.1% | 23.9% |
-| Morocco | 4.4% | 11.8% | 26.1% |
-| Mexico | 3.4% | 9.4% | 23.9% |
-| Portugal | 2.2% | 5.0% | 10.9% |
-| Norway | 1.6% | 5.0% | 14.0% |
-| United States | 1.5% | 4.6% | 15.1% |
-| Belgium | 1.0% | 3.3% | 10.3% |
-| Switzerland | 1.0% | 3.1% | 9.6% |
-| Paraguay | 0.5% | 2.2% | 7.4% |
+| Argentina | 23.5% | 37.7% | 61.3% |
+| France | 21.1% | 39.2% | 61.0% |
+| Spain | 18.9% | 30.3% | 52.5% |
+| Brazil | 7.4% | 16.8% | 34.0% |
+| England | 6.1% | 13.5% | 26.9% |
+| Colombia | 4.8% | 10.5% | 23.0% |
+| Mexico | 3.9% | 10.4% | 24.4% |
+| Morocco | 3.8% | 11.0% | 25.2% |
+| Portugal | 3.5% | 7.8% | 19.6% |
+| Switzerland | 1.7% | 4.6% | 12.5% |
+| Norway | 1.7% | 5.4% | 14.7% |
+| Belgium | 1.4% | 4.3% | 14.2% |
+| United States | 1.4% | 4.1% | 13.7% |
+| Paraguay | 0.4% | 2.0% | 7.0% |
