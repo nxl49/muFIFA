@@ -19,6 +19,11 @@ from model import (build_training, fit_poisson, fit_rho, expected_goals,
                    score_matrix)
 import bracket as B
 
+# Scoreline reporting strategy:
+#   "expected" -> rounded expected goals (realistic, competitive games ~2-1)
+#   "mode"     -> single most-likely exact score (maximises exact-score hits, ~1-0)
+SCORELINE_MODE = "expected"
+
 
 class Predictor:
     def __init__(self, results_csv="data/results.csv"):
@@ -53,22 +58,29 @@ class Predictor:
         winner = home if p_home_adv >= 0.5 else away
         p_winner_reg = p_home_reg if winner == home else p_away_reg
 
-        # Representative scoreline reflects the most-likely OUTCOME CATEGORY:
-        # if the winner is more likely to win in regulation than to draw, report
-        # the modal decisive score; otherwise report the modal draw (advance on
-        # penalties). Then pick the highest-probability exact score in that class.
-        n = M.shape[0]
-        decisive = p_winner_reg >= p_draw
-        best, bestp = None, -1.0
-        for i in range(n):
-            for j in range(n):
-                if decisive:
-                    ok = (i > j) if winner == home else (j > i)
-                else:
-                    ok = (i == j)
-                if ok and M[i, j] > bestp:
-                    bestp, best = M[i, j], (i, j)
-        hs, as_ = best
+        if SCORELINE_MODE == "expected":
+            # Expected-goals scoreline: round each side's xG, then make the
+            # predicted winner score at least once and finish strictly ahead
+            # (competitive games -> 2-1, dominant ones -> 2-0). More realistic.
+            hg, ag = int(round(lh)), int(round(la))
+            wg = hg if winner == home else ag
+            lg = ag if winner == home else hg
+            wg = max(wg, 1)
+            if wg <= lg:
+                wg = lg + 1
+            hs, as_ = (wg, lg) if winner == home else (lg, wg)
+        else:
+            # "mode": most-likely exact score in the more-probable outcome class
+            # (decisive win vs draw-then-penalties). Maximises exact-score hits.
+            n = M.shape[0]
+            decisive = p_winner_reg >= p_draw
+            best, bestp = None, -1.0
+            for i in range(n):
+                for j in range(n):
+                    ok = ((i > j) if winner == home else (j > i)) if decisive else (i == j)
+                    if ok and M[i, j] > bestp:
+                        bestp, best = M[i, j], (i, j)
+            hs, as_ = best
         return {
             "home": home, "away": away, "round": rnd,
             "home_score": hs, "away_score": as_, "winner": winner,

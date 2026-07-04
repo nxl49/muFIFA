@@ -53,22 +53,22 @@ Backtest (train 2002-2022, test 2023-2026, 3674 matches):
 
 | Stage | Home | Score | Away | Winner | P(home adv) |
 |-------|------|-------|------|--------|-------------|
-| R16-0 | Canada | 0-1 | Morocco | **Morocco** | 29% |
-| R16-1 | Paraguay | 0-1 | France | **France** | 15% |
-| R16-2 | Brazil | 1-0 | Norway | **Brazil** | 65% |
-| R16-3 | Mexico | 1-0 | England | **Mexico** | 51% |
-| R16-4 | Portugal | 0-1 | Spain | **Spain** | 30% |
-| R16-5 | United States | 1-0 | Belgium | **United States** | 50% |
-| R16-6 | Argentina | 2-0 | Egypt | **Argentina** | 90% |
-| R16-7 | Switzerland | 0-1 | Colombia | **Colombia** | 39% |
-| QF-0 | Morocco | 0-1 | France | **France** | 28% |
-| QF-1 | Brazil | 1-0 | Mexico | **Brazil** | 58% |
-| QF-2 | Spain | 1-0 | United States | **Spain** | 81% |
-| QF-3 | Argentina | 1-0 | Colombia | **Argentina** | 69% |
-| SF-0 | France | 1-0 | Brazil | **France** | 62% |
-| SF-1 | Spain | 0-1 | Argentina | **Argentina** | 50% |
-| Third | Brazil | 0-1 | Spain | **Spain** | 35% |
-| Final | France | 0-1 | Argentina | **Argentina** | 46% |
+| R16-0 | Canada | 1-2 | Morocco | **Morocco** | 29% |
+| R16-1 | Paraguay | 1-2 | France | **France** | 15% |
+| R16-2 | Brazil | 2-1 | Norway | **Brazil** | 65% |
+| R16-3 | Mexico | 2-1 | England | **Mexico** | 51% |
+| R16-4 | Portugal | 1-2 | Spain | **Spain** | 30% |
+| R16-5 | United States | 2-1 | Belgium | **United States** | 50% |
+| R16-6 | Argentina | 2-1 | Egypt | **Argentina** | 90% |
+| R16-7 | Switzerland | 1-2 | Colombia | **Colombia** | 39% |
+| QF-0 | Morocco | 1-2 | France | **France** | 28% |
+| QF-1 | Brazil | 2-1 | Mexico | **Brazil** | 58% |
+| QF-2 | Spain | 2-1 | United States | **Spain** | 81% |
+| QF-3 | Argentina | 2-1 | Colombia | **Argentina** | 69% |
+| SF-0 | France | 2-1 | Brazil | **France** | 62% |
+| SF-1 | Spain | 1-2 | Argentina | **Argentina** | 50% |
+| Third | Brazil | 1-2 | Spain | **Spain** | 35% |
+| Final | France | 1-2 | Argentina | **Argentina** | 46% |
 
 ## Monte-Carlo tournament simulation (50,000 runs)
 

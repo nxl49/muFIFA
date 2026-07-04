@@ -19,6 +19,13 @@ SQUAD_NUMBERS = {
     "United States": {"Christian Pulisic": 10, "Weston McKennie": 8},
     "Colombia":      {"Luis Díaz": 7, "James Rodríguez": 10, "Jhon Córdoba": 9},
     "Mexico":        {"Raúl Jiménez": 9, "Santiago Giménez": 11},
+    "Belgium":       {"Romelu Lukaku": 9, "Kevin De Bruyne": 7, "Leandro Trossard": 10},
+    "Canada":        {"Jonathan David": 10, "Alphonso Davies": 22},
+    "Egypt":         {"Mohamed Salah": 10, "Omar Marmoush": 22},
+    "Norway":        {"Erling Haaland": 9, "Alexander Sørloth": 7},
+    "Paraguay":      {"Julio Enciso": 19, "Antonio Sanabria": 9},
+    "Portugal":      {"Cristiano Ronaldo": 7, "Bruno Fernandes": 8, "Gonçalo Ramos": 9},
+    "Switzerland":   {"Breel Embolo": 7, "Granit Xhaka": 10},
 }
 
 # Accent / spelling variants that appear in goalscorers.csv -> canonical name.
